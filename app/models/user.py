@@ -9,13 +9,12 @@ from passlib.context import CryptContext
 from pydantic import ValidationError
 from sqlalchemy import Boolean, Column, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base
+from app.database import Base
 
 from app.schemas.base import UserCreate
 from app.schemas.user import Token, UserResponse
 
 
-Base = declarative_base()
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
