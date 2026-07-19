@@ -148,3 +148,82 @@ docker pull pd486/module10-fastapi-is601:latest
 ## Reflection
 
 See `Reflection.md` for a summary of the work completed, challenges encountered, and lessons learned while implementing user authentication, BREAD API endpoints, testing, and CI/CD during Module 12.
+
+---
+
+# Module 13 – Calculation Model, Pydantic Schemas, and Factory Pattern
+
+## Overview
+
+Module 13 extends the FastAPI Calculator project by strengthening the application's data layer. A dedicated SQLAlchemy `Calculation` model was implemented to represent calculation records, while Pydantic schemas were added to validate request and response data before it reaches the API layer. The project continues to follow a modular architecture using the Factory design pattern for arithmetic operations, making the application easier to maintain and extend as new calculation types are added.
+
+## Features Added
+
+- SQLAlchemy `Calculation` model
+- Pydantic schemas for calculation validation
+- `CalculationCreate` schema
+- `CalculationRead` schema
+- Factory Pattern for creating calculation operations
+- Validation for supported calculation types
+- Division-by-zero validation and error handling
+- Improved separation between database models and API schemas
+- Expanded unit and integration testing
+- Successful GitHub Actions CI/CD workflow
+- Docker image successfully built and published to Docker Hub
+
+---
+
+## Testing
+
+The Module 13 implementation was verified through automated testing.
+
+Run the standard test suite:
+
+```bash
+pytest
+```
+
+Result:
+
+- **94 tests passed**
+- **1 slow test skipped**
+
+Run the complete suite:
+
+```bash
+pytest --run-slow
+```
+
+Result:
+
+- **95 tests passed**
+
+Testing includes:
+
+- Unit tests
+- Integration tests
+- Database model tests
+- Pydantic schema validation tests
+- Authentication tests
+- API endpoint tests
+- End-to-end Playwright tests
+
+---
+
+## CI/CD
+
+The GitHub Actions workflow continues to validate every push by:
+
+1. Running unit, integration, and end-to-end tests.
+2. Running authentication and database tests.
+3. Performing a Trivy security scan.
+4. Building the Docker image.
+5. Publishing the Docker image to Docker Hub after all checks pass.
+
+All workflows completed successfully after implementing the Module 13 enhancements, confirming that the application builds correctly, passes automated testing, and is ready for deployment.
+
+---
+
+## Module 13 Reflection
+
+See `Reflection.md` for a discussion of the design decisions, implementation process, testing strategy, challenges encountered, and lessons learned while developing the Calculation model, Pydantic schemas, Factory Pattern, and maintaining a reliable CI/CD pipeline.
