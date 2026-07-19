@@ -1,5 +1,7 @@
 """User registration and login routes."""
 
+import traceback
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -26,21 +28,35 @@ def register_user(
 ):
     """Register a new user and securely hash the password."""
     try:
-        new_user = User.register(db, user_data.model_dump())
+        new_user = User.register(
+            db,
+            user_data.model_dump(),
+        )
+
         db.commit()
         db.refresh(new_user)
+
         return new_user
+
     except ValueError as exc:
         db.rollback()
+
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
+
     except Exception as exc:
         db.rollback()
+
+        print("\nREGISTRATION ERROR")
+        traceback.print_exc()
+        print(f"ERROR TYPE: {type(exc).__name__}")
+        print(f"ERROR MESSAGE: {exc}\n")
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Unable to register user",
+            detail=f"{type(exc).__name__}: {exc}",
         ) from exc
 
 
@@ -54,17 +70,36 @@ def login_user(
     db: Session = Depends(get_db),
 ):
     """Authenticate a user and return a JWT access token."""
-    token_data = User.authenticate(
-        db,
-        username=credentials.username,
-        password=credentials.password,
-    )
-
-    if token_data is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid username or password",
-            headers={"WWW-Authenticate": "Bearer"},
+    try:
+        token_data = User.authenticate(
+            db,
+            username=credentials.username,
+            password=credentials.password,
         )
 
-    return token_data
+        if token_data is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid username or password",
+                headers={
+                    "WWW-Authenticate": "Bearer",
+                },
+            )
+
+        return token_data
+
+    except HTTPException:
+        raise
+
+    except Exception as exc:
+        db.rollback()
+
+        print("\nLOGIN ERROR")
+        traceback.print_exc()
+        print(f"ERROR TYPE: {type(exc).__name__}")
+        print(f"ERROR MESSAGE: {exc}\n")
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"{type(exc).__name__}: {exc}",
+        ) from exc

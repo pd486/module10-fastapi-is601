@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | FastAPI Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+    <main class="min-h-screen py-6 flex flex-col justify-center sm:py-12">
+        <div class="relative py-3 sm:max-w-xl sm:mx-auto">
+            <div class="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
+                <div class="max-w-md mx-auto">
+                    <h1 class="text-3xl font-bold mb-8 text-center text-gray-800">
+                        Create Account
+                    </h1>
+
+                    <div
+                        id="errorAlert"
+                        class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+                        role="alert"
+                    >
+                        <span id="errorMessage"></span>
+                    </div>
+
+                    <div
+                        id="successAlert"
+                        class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4"
+                        role="alert"
+                    >
+                        <span id="successMessage"></span>
+                    </div>
+
+                    <form id="registrationForm" class="space-y-6" novalidate>
+                        <div>
+                            <label
+                                for="username"
+                                class="block text-sm font-medium text-gray-700"
+                            >
+                                Username
+                            </label>
+
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                minlength="3"
+                                maxlength="50"
+                                required
+                                autocomplete="username"
+                                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                        </div>
+
+                        <div>
+                            <label
+                                for="email"
+                                class="block text-sm font-medium text-gray-700"
+                            >
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                required
+                                autocomplete="email"
+                                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                        </div>
+
+                        <div>
+                            <label
+                                for="first_name"
+                                class="block text-sm font-medium text-gray-700"
+                            >
+                                First Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="first_name"
+                                name="first_name"
+                                maxlength="50"
+                                required
+                                autocomplete="given-name"
+                                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                        </div>
+
+                        <div>
+                            <label
+                                for="last_name"
+                                class="block text-sm font-medium text-gray-700"
+                            >
+                                Last Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="last_name"
+                                name="last_name"
+                                maxlength="50"
+                                required
+                                autocomplete="family-name"
+                                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                        </div>
+
+                        <div>
+                            <label
+                                for="password"
+                                class="block text-sm font-medium text-gray-700"
+                            >
+                                Password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                minlength="6"
+                                maxlength="128"
+                                required
+                                autocomplete="new-password"
+                                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+
+                            <p class="mt-1 text-xs text-gray-500">
+                                At least 6 characters with uppercase, lowercase, and a number.
+                            </p>
+                        </div>
+
+                        <div>
+                            <label
+                                for="confirm_password"
+                                class="block text-sm font-medium text-gray-700"
+                            >
+                                Confirm Password
+                            </label>
+
+                            <input
+                                type="password"
+                                id="confirm_password"
+                                name="confirm_password"
+                                minlength="6"
+                                maxlength="128"
+                                required
+                                autocomplete="new-password"
+                                class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                        </div>
+
+                        <button
+                            id="registerButton"
+                            type="submit"
+                            class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                            Register
+                        </button>
+                    </form>
+
+                    <p class="mt-6 text-sm text-gray-600 text-center">
+                        Already have an account?
+                        <a
+                            href="/login"
+                            class="font-medium text-indigo-600 hover:text-indigo-500"
+                        >
+                            Log in
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("registrationForm");
+            const registerButton = document.getElementById("registerButton");
+            const errorAlert = document.getElementById("errorAlert");
+            const errorMessage = document.getElementById("errorMessage");
+            const successAlert = document.getElementById("successAlert");
+            const successMessage = document.getElementById("successMessage");
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorAlert.classList.remove("hidden");
+                successAlert.classList.add("hidden");
+            }
+
+            function showSuccess(message) {
+                successMessage.textContent = message;
+                successAlert.classList.remove("hidden");
+                errorAlert.classList.add("hidden");
+            }
+
+            function isValidEmail(email) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            }
+
+            function isValidPassword(password) {
+                return (
+                    password.length >= 6 &&
+                    /[A-Z]/.test(password) &&
+                    /[a-z]/.test(password) &&
+                    /[0-9]/.test(password)
+                );
+            }
+
+            function getErrorMessage(data) {
+                if (typeof data.detail === "string") {
+                    return data.detail;
+                }
+
+                if (Array.isArray(data.detail)) {
+                    return data.detail
+                        .map((error) => error.msg)
+                        .join("; ");
+                }
+
+                if (typeof data.error === "string") {
+                    return data.error;
+                }
+
+                return "Registration failed";
+            }
+
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                errorAlert.classList.add("hidden");
+                successAlert.classList.add("hidden");
+
+                const username = form.username.value.trim();
+                const email = form.email.value.trim();
+                const firstName = form.first_name.value.trim();
+                const lastName = form.last_name.value.trim();
+                const password = form.password.value;
+                const confirmPassword = form.confirm_password.value;
+
+                if (username.length < 3) {
+                    showError("Username must be at least 3 characters long");
+                    return;
+                }
+
+                if (!isValidEmail(email)) {
+                    showError("Please enter a valid email address");
+                    return;
+                }
+
+                if (!firstName || !lastName) {
+                    showError("First name and last name are required");
+                    return;
+                }
+
+                if (!isValidPassword(password)) {
+                    showError(
+                        "Password must be at least 6 characters long and contain uppercase, lowercase, and a number"
+                    );
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    showError("Passwords do not match");
+                    return;
+                }
+
+                const registrationData = {
+                    username: username,
+                    email: email,
+                    first_name: firstName,
+                    last_name: lastName,
+                    password: password
+                };
+
+                registerButton.disabled = true;
+                registerButton.textContent = "Registering...";
+
+                try {
+                    const response = await fetch("/users/register", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(registrationData)
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(getErrorMessage(data));
+                    }
+
+                    showSuccess(
+                        "Registration successful! Redirecting to login..."
+                    );
+
+                    form.reset();
+
+                    window.setTimeout(() => {
+                        window.location.href = "/login";
+                    }, 2000);
+                } catch (error) {
+                    showError(
+                        error.message ||
+                        "An error occurred during registration"
+                    );
+                } finally {
+                    registerButton.disabled = false;
+                    registerButton.textContent = "Register";
+                }
+            });
+        });
+    </script>
+</body>
+</html>

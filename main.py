@@ -1,123 +1,223 @@
 # main.py
 
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
-from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, Field, field_validator  # Use @validator for Pydantic 1.x
-from fastapi.exceptions import RequestValidationError
-from app.operations import add, subtract, multiply, divide  # Ensure correct import path
-import uvicorn
 import logging
-from app.routes.users import router as users_router
-from app.routes.calculations import router as calculations_router
 
-# Setup logging
+import uvicorn
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel, Field, field_validator
+
+from app.operations import add, divide, multiply, subtract
+from app.routes.calculations import router as calculations_router
+from app.routes.users import router as users_router
+
+
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
 
+# Create FastAPI application
+app = FastAPI(
+    title="FastAPI Calculator",
+    description="Calculator application with JWT authentication",
+    version="13.0.0",
+)
+
+
+# Include API routers
 app.include_router(users_router)
 app.include_router(calculations_router)
 
-# Setup templates directory
+
+# Configure front-end files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Pydantic model for request data
+
 class OperationRequest(BaseModel):
+    """Request model for calculator operations."""
+
     a: float = Field(..., description="The first number")
     b: float = Field(..., description="The second number")
 
-    @field_validator('a', 'b')  # Correct decorator for Pydantic 1.x
-    def validate_numbers(cls, value):
+    @field_validator("a", "b")
+    @classmethod
+    def validate_numbers(cls, value: float) -> float:
         if not isinstance(value, (int, float)):
-            raise ValueError('Both a and b must be numbers.')
+            raise ValueError("Both a and b must be numbers.")
         return value
 
-# Pydantic model for successful response
+
 class OperationResponse(BaseModel):
+    """Response model for successful calculator operations."""
+
     result: float = Field(..., description="The result of the operation")
 
-# Pydantic model for error response
+
 class ErrorResponse(BaseModel):
+    """Response model for errors."""
+
     error: str = Field(..., description="Error message")
 
-# Custom Exception Handlers
+
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    logger.error(f"HTTPException on {request.url.path}: {exc.detail}")
+async def http_exception_handler(
+    request: Request,
+    exc: HTTPException,
+) -> JSONResponse:
+    """Return API errors in a consistent JSON format."""
+
+    logger.error("HTTPException on %s: %s", request.url.path, exc.detail)
+
     return JSONResponse(
         status_code=exc.status_code,
         content={"error": exc.detail},
     )
 
+
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    # Extracting error messages
-    error_messages = "; ".join([f"{err['loc'][-1]}: {err['msg']}" for err in exc.errors()])
-    logger.error(f"ValidationError on {request.url.path}: {error_messages}")
+async def validation_exception_handler(
+    request: Request,
+    exc: RequestValidationError,
+) -> JSONResponse:
+    """Return request-validation errors in a consistent format."""
+
+    error_messages = "; ".join(
+        f"{error['loc'][-1]}: {error['msg']}"
+        for error in exc.errors()
+    )
+
+    logger.error(
+        "ValidationError on %s: %s",
+        request.url.path,
+        error_messages,
+    )
+
     return JSONResponse(
         status_code=400,
         content={"error": error_messages},
     )
 
-@app.get("/")
-async def read_root(request: Request):
-    """
-    Serve the index.html template.
-    """
-    return templates.TemplateResponse("index.html", {"request": request})
 
-@app.post("/add", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+# -------------------------------------------------------------------------
+# Front-end page routes
+# -------------------------------------------------------------------------
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    """Serve the existing calculator page."""
+
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+    )
+
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    """Serve the Module 13 login page."""
+
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html",
+    )
+
+
+@app.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    """Serve the Module 13 registration page."""
+
+    return templates.TemplateResponse(
+        request=request,
+        name="register.html",
+    )
+
+
+# -------------------------------------------------------------------------
+# Calculator API routes
+# -------------------------------------------------------------------------
+
+@app.post(
+    "/add",
+    response_model=OperationResponse,
+    responses={400: {"model": ErrorResponse}},
+)
 async def add_route(operation: OperationRequest):
-    """
-    Add two numbers.
-    """
+    """Add two numbers."""
+
     try:
         result = add(operation.a, operation.b)
         return OperationResponse(result=result)
-    except Exception as e:
-        logger.error(f"Add Operation Error: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as exc:
+        logger.error("Add Operation Error: %s", exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-@app.post("/subtract", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+
+@app.post(
+    "/subtract",
+    response_model=OperationResponse,
+    responses={400: {"model": ErrorResponse}},
+)
 async def subtract_route(operation: OperationRequest):
-    """
-    Subtract two numbers.
-    """
+    """Subtract two numbers."""
+
     try:
         result = subtract(operation.a, operation.b)
         return OperationResponse(result=result)
-    except Exception as e:
-        logger.error(f"Subtract Operation Error: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as exc:
+        logger.error("Subtract Operation Error: %s", exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-@app.post("/multiply", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+
+@app.post(
+    "/multiply",
+    response_model=OperationResponse,
+    responses={400: {"model": ErrorResponse}},
+)
 async def multiply_route(operation: OperationRequest):
-    """
-    Multiply two numbers.
-    """
+    """Multiply two numbers."""
+
     try:
         result = multiply(operation.a, operation.b)
         return OperationResponse(result=result)
-    except Exception as e:
-        logger.error(f"Multiply Operation Error: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as exc:
+        logger.error("Multiply Operation Error: %s", exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-@app.post("/divide", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+
+@app.post(
+    "/divide",
+    response_model=OperationResponse,
+    responses={
+        400: {"model": ErrorResponse},
+        500: {"model": ErrorResponse},
+    },
+)
 async def divide_route(operation: OperationRequest):
-    """
-    Divide two numbers.
-    """
+    """Divide two numbers."""
+
     try:
         result = divide(operation.a, operation.b)
         return OperationResponse(result=result)
-    except ValueError as e:
-        logger.error(f"Divide Operation Error: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Divide Operation Internal Error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    except ValueError as exc:
+        logger.error("Divide Operation Error: %s", exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.error("Divide Operation Internal Error: %s", exc)
+        raise HTTPException(
+            status_code=500,
+            detail="Internal Server Error",
+        ) from exc
+
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(
+        "main:app",
+        host="127.0.0.1",
+        port=8000,
+        reload=True,
+    )
