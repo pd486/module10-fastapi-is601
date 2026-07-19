@@ -127,6 +127,8 @@ def db_session(request) -> Generator[Session, None, None]:
     preserve_db = request.config.getoption("--preserve-db")
 
     try:
+        Base.metadata.create_all(bind=test_engine)
+
         if not preserve_db:
             clean_database(session)
 
