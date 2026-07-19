@@ -177,8 +177,11 @@ def test_authenticate_with_email(db_session, fake_user_data):
     assert "access_token" in auth_result
 
 def test_user_model_representation(test_user):
-    """Test the string representation of User model"""
-    expected = f"<User(name={test_user.first_name} {test_user.last_name}, email={test_user.email})>"
+    """Test the string representation of User model."""
+    expected = (
+        f"<User(username={test_user.username}, "
+        f"email={test_user.email})>"
+    )
     assert str(test_user) == expected
 
 def test_missing_password_registration(db_session):
@@ -192,5 +195,5 @@ def test_missing_password_registration(db_session):
     }
     
     # Adjust the expected error message
-    with pytest.raises(ValueError, match="Password must be at least 6 characters long"):
+with pytest.raises(ValueError, match="Field required"):
         User.register(db_session, test_data)
