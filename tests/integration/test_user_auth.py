@@ -193,7 +193,6 @@ def test_missing_password_registration(db_session):
         "username": "nopassworduser",
         # Password is missing
     }
-    
-    # Adjust the expected error message
-with pytest.raises(ValueError, match="Field required"):
+
+    with pytest.raises(ValueError, match="Field required"):
         User.register(db_session, test_data)
