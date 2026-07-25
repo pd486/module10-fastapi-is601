@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Saved Calculations</title>
+</head>
+<body>
+    <h1>Saved Calculations</h1>
+
+    <p>
+        <a href="/">Calculator</a>
+        |
+        <a href="/calculations-page">Saved Calculations</a>
+    </p>
+
+    <h2>Add Calculation</h2>
+
+    <label for="a">First number:</label>
+    <input type="number" id="a" step="any">
+
+    <label for="b">Second number:</label>
+    <input type="number" id="b" step="any">
+
+    <label for="type">Operation:</label>
+    <select id="type">
+    <option value="Add">Add</option>
+    <option value="Subtract">Subtract</option>
+    <option value="Multiply">Multiply</option>
+    <option value="Divide">Divide</option>
+</select>
+
+    <button id="save-button" onclick="addCalculation()">
+        Save Calculation
+    </button>
+
+    <div id="message"></div>
+
+    <h2>Calculation History</h2>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>First Number</th>
+                <th>Operation</th>
+                <th>Second Number</th>
+                <th>Result</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="calculation-list"></tbody>
+    </table>
+
+    <script>
+        async function loadCalculations() {
+            const list = document.getElementById('calculation-list');
+            const message = document.getElementById('message');
+
+            try {
+                const response = await fetch('/calculations');
+                const calculations = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        calculations.error ||
+                        calculations.detail ||
+                        'Unable to load calculations'
+                    );
+                }
+
+                list.innerHTML = '';
+
+                calculations.forEach((calculation) => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${calculation.a}</td>
+                        <td>${calculation.type}</td>
+                        <td>${calculation.b}</td>
+                        <td>${calculation.result}</td>
+                        <td>
+                            <button
+                                onclick="deleteCalculation('${calculation.id}')"
+                            >
+                                Delete
+                            </button>
+                        </td>
+                    `;
+
+                    list.appendChild(row);
+                });
+            } catch (error) {
+                message.innerText = 'Error: ' + error.message;
+            }
+        }
+
+        async function addCalculation() {
+            const aValue = document.getElementById('a').value;
+            const bValue = document.getElementById('b').value;
+            const type = document.getElementById('type').value;
+            const message = document.getElementById('message');
+
+            if (aValue === '' || bValue === '') {
+                message.innerText = 'Error: Both numbers are required.';
+                return;
+            }
+
+            const a = parseFloat(aValue);
+            const b = parseFloat(bValue);
+
+            if (type === 'Divide' && b === 0) {
+            message.innerText = 'Error: Cannot divide by zero.';
+                return;
+            }
+
+            try {
+                const response = await fetch('/calculations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        a: a,
+                        b: b,
+                        type: type
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error ||
+                        data.detail ||
+                        'Unable to save calculation'
+                    );
+                }
+
+                message.innerText = 'Calculation saved successfully.';
+
+                document.getElementById('a').value = '';
+                document.getElementById('b').value = '';
+
+                await loadCalculations();
+            } catch (error) {
+                message.innerText = 'Error: ' + error.message;
+            }
+        }
+
+        async function deleteCalculation(calculationId) {
+            const message = document.getElementById('message');
+
+            try {
+                const response = await fetch(
+                    '/calculations/' + calculationId,
+                    {
+                        method: 'DELETE'
+                    }
+                );
+
+                if (!response.ok) {
+                    const data = await response.json();
+
+                    throw new Error(
+                        data.error ||
+                        data.detail ||
+                        'Unable to delete calculation'
+                    );
+                }
+
+                message.innerText = 'Calculation deleted successfully.';
+                await loadCalculations();
+            } catch (error) {
+                message.innerText = 'Error: ' + error.message;
+            }
+        }
+
+        loadCalculations();
+    </script>
+</body>
+</html>

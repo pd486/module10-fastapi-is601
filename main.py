@@ -137,6 +137,15 @@ async def register_page(request: Request):
     )
 
 
+@app.get("/calculations-page", response_class=HTMLResponse)
+async def calculations_page(request: Request):
+    """Serve the calculation management page."""
+
+    return templates.TemplateResponse(
+        request=request,
+        name="calculations.html",
+    )
+
 # -------------------------------------------------------------------------
 # Calculator API routes
 # -------------------------------------------------------------------------
@@ -221,3 +230,4 @@ if __name__ == "__main__":
         port=8000,
         reload=True,
     )
+
