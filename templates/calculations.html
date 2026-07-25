@@ -50,13 +50,15 @@
     </table>
 
     <script>
+        let editingCalculationId = null;
+        let calculations = [];
         async function loadCalculations() {
             const list = document.getElementById('calculation-list');
             const message = document.getElementById('message');
 
             try {
                 const response = await fetch('/calculations');
-                const calculations = await response.json();
+                calculations = await response.json();
 
                 if (!response.ok) {
                     throw new Error(
@@ -76,13 +78,21 @@
                         <td>${calculation.type}</td>
                         <td>${calculation.b}</td>
                         <td>${calculation.result}</td>
-                        <td>
+                    <td>
                             <button
-                                onclick="deleteCalculation('${calculation.id}')"
-                            >
-                                Delete
-                            </button>
-                        </td>
+                            onclick="editCalculation('${calculation.id}')"
+                        >
+                            Edit
+                        </button>
+
+                        <button
+                            onclick="deleteCalculation('${calculation.id}')"
+                        >
+                            Delete
+                        </button>
+                    </td>
+
+
                     `;
 
                     list.appendChild(row);
@@ -112,8 +122,12 @@
             }
 
             try {
-                const response = await fetch('/calculations', {
-                    method: 'POST',
+                const response = await fetch(
+                    editingCalculationId
+                        ? '/calculations/' + editingCalculationId
+                        : '/calculations',
+                    {
+                        method: editingCalculationId ? 'PUT' : 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -134,7 +148,11 @@
                     );
                 }
 
-                message.innerText = 'Calculation saved successfully.';
+                message.innerText = editingCalculationId
+                    ? 'Calculation updated successfully.'
+                    : 'Calculation saved successfully.';
+
+                editingCalculationId = null;
 
                 document.getElementById('a').value = '';
                 document.getElementById('b').value = '';
@@ -172,6 +190,28 @@
                 message.innerText = 'Error: ' + error.message;
             }
         }
+
+        async function editCalculation(calculationId) {
+            const calculation = calculations.find(
+                item => item.id === calculationId
+            );
+
+            if (!calculation) {
+                document.getElementById('message').innerText =
+                    'Error: Calculation not found.';
+                return;
+            }
+
+            editingCalculationId = calculationId;
+
+            document.getElementById('a').value = calculation.a;
+            document.getElementById('b').value = calculation.b;
+            document.getElementById('type').value = calculation.type;
+
+            document.getElementById('message').innerText =
+                'Editing calculation. Change the values and click Save Calculation.';
+        }
+
 
         loadCalculations();
     </script>
