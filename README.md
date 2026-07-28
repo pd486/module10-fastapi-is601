@@ -1,12 +1,8 @@
-# Module 12 & 13 – FastAPI Authentication, Calculations, and CI/CD
+# Module 14 – FastAPI Frontend BREAD Application
 
 ## Overview
 
-This project extends the FastAPI Calculator application by implementing user authentication, calculation management, and automated testing. The application uses FastAPI, SQLAlchemy, PostgreSQL, JWT authentication, Docker, and GitHub Actions to provide a secure REST API with continuous integration and deployment.
-
-Module 12 focused on implementing user authentication, API endpoints, and CI/CD. Module 13 expanded the project by refining calculation validation, increasing test coverage, and improving the overall project organization.
-
----
+This project builds on the FastAPI Calculator from the previous modules by adding a frontend for managing calculations. Instead of only using the API through Swagger, users can now interact with the application through a web interface to create, view, edit, and delete calculations. The project uses FastAPI, SQLAlchemy, PostgreSQL, JWT authentication, JavaScript, Docker, and GitHub Actions.
 
 ## Features
 
@@ -14,18 +10,20 @@ Module 12 focused on implementing user authentication, API endpoints, and CI/CD.
 - User login using JWT authentication
 - SQLAlchemy User model
 - SQLAlchemy Calculation model
-- Calculation BREAD API endpoints
-- Pydantic schemas for request and response validation
+- Frontend interface for managing calculations
+- Browse calculations
+- Add new calculations
+- Edit existing calculations
+- Delete calculations
+- Pydantic validation for requests and responses
 - Factory Pattern for Add, Subtract, Multiply, and Divide operations
 - Validation for supported calculation types
 - Division-by-zero validation
 - PostgreSQL database integration
-- Unit, integration, and Playwright end-to-end tests
+- Unit, integration, and Playwright tests
 - Interactive Swagger API documentation
 - GitHub Actions CI/CD pipeline
 - Docker Hub image deployment
-
----
 
 ## Running the Application
 
@@ -76,19 +74,28 @@ python -m app.database_init
 uvicorn app.main:app --reload
 ```
 
-The application is available at:
+Open the application:
 
 ```
 http://127.0.0.1:8000
 ```
 
-Swagger/OpenAPI documentation:
+Swagger documentation:
 
 ```
 http://127.0.0.1:8000/docs
 ```
 
----
+## Frontend
+
+Module 14 adds a browser interface that allows users to manage calculations without using Swagger. After logging in, users can:
+
+- View saved calculations
+- Create new calculations
+- Edit existing calculations
+- Delete calculations
+
+The frontend communicates with the FastAPI backend using JavaScript and authenticated API requests.
 
 ## Running Tests
 
@@ -98,19 +105,13 @@ Run the standard test suite:
 pytest
 ```
 
-Run the complete test suite, including slow tests:
+Run all tests, including slow tests:
 
 ```bash
 pytest --run-slow
 ```
 
-Current test results:
-
-- 94 tests passed
-- 1 slow test skipped (default)
-- 95 tests passed when running with `--run-slow`
-
-Testing includes:
+The project includes:
 
 - Unit tests
 - Integration tests
@@ -119,37 +120,24 @@ Testing includes:
 - API endpoint tests
 - Playwright end-to-end tests
 
----
-
 ## API Endpoints
 
 ### Authentication
 
-- `POST /users/register`
-- `POST /users/login`
+- POST `/users/register`
+- POST `/users/login`
 
 ### Calculations
 
-- `GET /calculations`
-- `GET /calculations/{id}`
-- `POST /calculations`
-- `PUT /calculations/{id}`
-- `DELETE /calculations/{id}`
-
----
+- GET `/calculations`
+- GET `/calculations/{id}`
+- POST `/calculations`
+- PUT `/calculations/{id}`
+- DELETE `/calculations/{id}`
 
 ## CI/CD
 
-Each push to the repository triggers a GitHub Actions workflow that:
-
-1. Runs unit, integration, and Playwright tests.
-2. Performs a Trivy security scan.
-3. Builds the Docker image.
-4. Pushes the Docker image to Docker Hub after all checks pass.
-
-The workflow completed successfully with all automated tests passing before deployment.
-
----
+GitHub Actions automatically runs the project's tests whenever changes are pushed to GitHub. After the tests pass, the workflow performs a security scan, builds the Docker image, and pushes the latest image to Docker Hub.
 
 ## Docker Hub
 
@@ -163,8 +151,6 @@ Pull the latest image:
 docker pull pd486/module10-fastapi-is601:latest
 ```
 
----
-
 ## Reflection
 
-See **Reflection.md** for a summary of the work completed, challenges encountered, testing experience, and lessons learned while developing Modules 12 and 13.
+See **Reflection.md** for a summary of the work completed in Module 14, the challenges encountered while building the frontend, and what I learned during the project.
