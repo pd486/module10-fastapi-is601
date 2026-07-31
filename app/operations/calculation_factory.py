@@ -42,6 +42,28 @@ class DivideOperation(Operation):
         return a / b
 
 
+class PowerOperation(Operation):
+    """Raise the first number to the power of the second."""
+
+    def calculate(self, a: float, b: float) -> float:
+        if a == 0 and b < 0:
+            raise ValueError("Cannot raise zero to a negative power")
+
+        try:
+            result = a ** b
+        except OverflowError as exc:
+            raise ValueError(
+                "Result is too large to calculate"
+            ) from exc
+
+        if isinstance(result, complex):
+            raise ValueError(
+                "Cannot raise a negative number to a fractional power"
+            )
+
+        return result
+
+
 class CalculationFactory:
     """Create the correct operation object from its type."""
 
@@ -50,6 +72,7 @@ class CalculationFactory:
         "Subtract": SubtractOperation,
         "Multiply": MultiplyOperation,
         "Divide": DivideOperation,
+        "Power": PowerOperation,
     }
 
     @classmethod

@@ -26,7 +26,6 @@
     <option value="Subtract">Subtract</option>
     <option value="Multiply">Multiply</option>
     <option value="Divide">Divide</option>
-    <option value="Power">Power</option>
 </select>
 
     <button id="save-button" onclick="addCalculation()">
@@ -119,16 +118,6 @@
 
             if (type === 'Divide' && b === 0) {
             message.innerText = 'Error: Cannot divide by zero.';
-                return;
-            }
-
-            if (type === 'Power' && a === 0 && b < 0) {
-                message.innerText = 'Error: Cannot raise zero to a negative power.';
-                return;
-            }
-
-            if (type === 'Power' && a < 0 && !Number.isInteger(b)) {
-                message.innerText = 'Error: Cannot raise a negative number to a fractional power.';
                 return;
             }
 
