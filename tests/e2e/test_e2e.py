@@ -163,3 +163,44 @@ def test_login_rejects_incorrect_password(
     )
 
     assert access_token is None
+
+@pytest.mark.e2e
+def test_power_calculation_saves_and_displays_result(
+    page: Page,
+    fastapi_server,
+) -> None:
+    """A user can save a Power calculation and see the computed result."""
+
+    page.goto(f"{BASE_URL}/calculations-page")
+
+    page.fill("#a", "2")
+    page.fill("#b", "10")
+    page.select_option("#type", "Power")
+    page.click("#save-button")
+
+    message = page.locator("#message")
+    expect(message).to_have_text("Calculation saved successfully.")
+
+    calculation_list = page.locator("#calculation-list")
+    expect(calculation_list).to_contain_text("Power")
+    expect(calculation_list).to_contain_text("1024")
+
+
+@pytest.mark.e2e
+def test_power_calculation_rejects_zero_to_negative_power(
+    page: Page,
+    fastapi_server,
+) -> None:
+    """The calculations page rejects an invalid Power calculation client-side."""
+
+    page.goto(f"{BASE_URL}/calculations-page")
+
+    page.fill("#a", "0")
+    page.fill("#b", "-1")
+    page.select_option("#type", "Power")
+    page.click("#save-button")
+
+    message = page.locator("#message")
+    expect(message).to_have_text(
+        "Error: Cannot raise zero to a negative power."
+    )

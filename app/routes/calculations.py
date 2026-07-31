@@ -82,9 +82,14 @@ def add_calculation(
         ) from exc
     except Exception as exc:
         db.rollback()
+        import traceback
+        print("\nCALCULATION CREATE ERROR")
+        traceback.print_exc()
+        print(f"ERROR TYPE: {type(exc).__name__}")
+        print(f"ERROR MESSAGE: {exc}\n")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Unable to create calculation",
+            detail=f"{type(exc).__name__}: {exc}",
         ) from exc
 
 

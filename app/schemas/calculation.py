@@ -13,6 +13,7 @@ class CalculationType(str, Enum):
     SUBTRACT = "Subtract"
     MULTIPLY = "Multiply"
     DIVIDE = "Divide"
+    POWER = "Power"
 
 
 class CalculationCreate(BaseModel):
@@ -29,6 +30,20 @@ class CalculationCreate(BaseModel):
             raise ValueError("Cannot divide by zero")
         return self
 
+    @model_validator(mode="after")
+    def validate_power(self) -> "CalculationCreate":
+        """Reject power operations with no real-number result."""
+        if self.type == CalculationType.POWER:
+            if self.a == 0 and self.b < 0:
+                raise ValueError("Cannot raise zero to a negative power")
+
+            if self.a < 0 and not float(self.b).is_integer():
+                raise ValueError(
+                    "Cannot raise a negative number to a fractional power"
+                )
+
+        return self
+
 
 class CalculationRead(BaseModel):
     """Serialize stored calculation data."""
@@ -40,4 +55,3 @@ class CalculationRead(BaseModel):
     result: float
 
     model_config = ConfigDict(from_attributes=True)
-    

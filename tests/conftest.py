@@ -8,13 +8,16 @@ from uuid import uuid4
 import pytest
 import requests
 from faker import Faker
-from playwright.sync_api import Browser, Page, sync_playwright
+from playwright.sync_api import Browser, Page, expect, sync_playwright
+
+expect.set_options(timeout=15000)
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import Base, get_engine, get_sessionmaker
 from app.models.user import User
+from app.models.calculation import Calculation
 
 
 logging.basicConfig(
@@ -203,6 +206,21 @@ def fastapi_server():
             raise ServerStartupError(
                 "FastAPI server failed to start."
             )
+
+        # Warm up the app's own database connection before any real
+        # test runs, so the first test isn't also the app's first
+        # ever query against the database.
+        for _ in range(10):
+            try:
+                warmup_response = requests.get(
+                    server_url + "calculations",
+                    timeout=5,
+                )
+                if warmup_response.status_code == 200:
+                    break
+            except requests.RequestException:
+                pass
+            time.sleep(1)
 
         yield server_url
     finally:

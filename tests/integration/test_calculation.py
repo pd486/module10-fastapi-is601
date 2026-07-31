@@ -60,3 +60,27 @@ def test_store_division_calculation(db_session):
 
     assert calculation.id is not None
     assert calculation.result == 5
+
+
+def test_store_power_calculation(db_session):
+    """A valid power calculation should be stored correctly."""
+
+    result = CalculationFactory.calculate(
+        "Power",
+        2,
+        10,
+    )
+
+    calculation = Calculation(
+        a=2,
+        b=10,
+        type="Power",
+        result=result,
+    )
+
+    db_session.add(calculation)
+    db_session.commit()
+    db_session.refresh(calculation)
+
+    assert calculation.id is not None
+    assert calculation.result == 1024

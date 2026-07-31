@@ -7,6 +7,7 @@ from app.operations.calculation_factory import (
     CalculationFactory,
     DivideOperation,
     MultiplyOperation,
+    PowerOperation,
     SubtractOperation,
 )
 
@@ -18,6 +19,9 @@ from app.operations.calculation_factory import (
         ("Subtract", 10, 5, 5),
         ("Multiply", 10, 5, 50),
         ("Divide", 10, 5, 2),
+        ("Power", 2, 10, 1024),
+        ("Power", 5, 0, 1),
+        ("Power", 4, 0.5, 2),
     ],
 )
 def test_factory_calculates_supported_operations(
@@ -43,6 +47,7 @@ def test_factory_calculates_supported_operations(
         ("Subtract", SubtractOperation),
         ("Multiply", MultiplyOperation),
         ("Divide", DivideOperation),
+        ("Power", PowerOperation),
     ],
 )
 def test_factory_creates_correct_operation(
@@ -61,7 +66,7 @@ def test_factory_rejects_invalid_type():
         ValueError,
         match="Unsupported calculation type",
     ):
-        CalculationFactory.create_operation("Power")
+        CalculationFactory.create_operation("Modulus")
 
 
 def test_divide_rejects_zero_divisor():
@@ -71,3 +76,35 @@ def test_divide_rejects_zero_divisor():
         match="Cannot divide by zero",
     ):
         CalculationFactory.calculate("Divide", 10, 0)
+
+
+def test_power_rejects_zero_to_negative_power():
+    """Zero raised to a negative power should raise a meaningful error."""
+    with pytest.raises(
+        ValueError,
+        match="Cannot raise zero to a negative power",
+    ):
+        CalculationFactory.calculate("Power", 0, -1)
+
+
+def test_power_rejects_negative_base_fractional_exponent():
+    """A negative base with a fractional exponent has no real result."""
+    with pytest.raises(
+        ValueError,
+        match="Cannot raise a negative number to a fractional power",
+    ):
+        CalculationFactory.calculate("Power", -8, 0.5)
+
+
+def test_power_supports_negative_exponent():
+    """A negative exponent should return the reciprocal power."""
+    result = CalculationFactory.calculate("Power", 2, -2)
+
+    assert result == 0.25
+
+
+def test_power_supports_negative_base_with_integer_exponent():
+    """A negative base with an integer exponent has a real result."""
+    result = CalculationFactory.calculate("Power", -2, 3)
+
+    assert result == -8
