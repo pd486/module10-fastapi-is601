@@ -1,8 +1,8 @@
-# Module 14 – FastAPI Frontend BREAD Application
+# FastAPI Calculator Final Project
 
 ## Overview
 
-This project builds on the FastAPI Calculator from the previous modules by adding a frontend for managing calculations. Instead of only using the API through Swagger, users can now interact with the application through a web interface to create, view, edit, and delete calculations. The project uses FastAPI, SQLAlchemy, PostgreSQL, JWT authentication, JavaScript, Docker, and GitHub Actions.
+This project is the completed FastAPI Calculator developed throughout the IS601 course. It provides a full-stack calculator application with user authentication, calculation management, and persistent data storage. The application uses FastAPI, SQLAlchemy, PostgreSQL, JWT authentication, JavaScript, Docker, and GitHub Actions to demonstrate modern web application development practices.
 
 ## Features
 
@@ -15,12 +15,19 @@ This project builds on the FastAPI Calculator from the previous modules by addin
 - Add new calculations
 - Edit existing calculations
 - Delete calculations
+- Supported operations:
+  - Add
+  - Subtract
+  - Multiply
+  - Divide
+  - Power
 - Pydantic validation for requests and responses
-- Factory Pattern for Add, Subtract, Multiply, and Divide operations
+- Factory Pattern for calculator operations
 - Validation for supported calculation types
 - Division-by-zero validation
+- Power operation validation
 - PostgreSQL database integration
-- Unit, integration, and Playwright tests
+- Unit, integration, and Playwright end-to-end tests
 - Interactive Swagger API documentation
 - GitHub Actions CI/CD pipeline
 - Docker Hub image deployment
@@ -32,6 +39,7 @@ This project builds on the FastAPI Calculator from the previous modules by addin
 ```bash
 git clone https://github.com/pd486/module10-fastapi-is601.git
 cd module10-fastapi-is601
+git checkout final-project
 ```
 
 ### Create and activate a virtual environment
@@ -88,27 +96,40 @@ http://127.0.0.1:8000/docs
 
 ## Frontend
 
-Module 14 adds a browser interface that allows users to manage calculations without using Swagger. After logging in, users can:
+The web interface allows authenticated users to manage calculations without using Swagger. Users can:
 
 - View saved calculations
 - Create new calculations
 - Edit existing calculations
 - Delete calculations
+- Perform Add, Subtract, Multiply, Divide, and Power operations
 
 The frontend communicates with the FastAPI backend using JavaScript and authenticated API requests.
 
 ## Running Tests
 
-Run the standard test suite:
+Run the complete test suite:
 
 ```bash
 pytest
 ```
 
-Run all tests, including slow tests:
+Run unit tests:
 
 ```bash
-pytest --run-slow
+pytest tests/unit -v
+```
+
+Run integration tests:
+
+```bash
+pytest tests/integration -v
+```
+
+Run Playwright end-to-end tests:
+
+```bash
+pytest tests/e2e -v
 ```
 
 The project includes:
@@ -137,7 +158,7 @@ The project includes:
 
 ## CI/CD
 
-GitHub Actions automatically runs the project's tests whenever changes are pushed to GitHub. After the tests pass, the workflow performs a security scan, builds the Docker image, and pushes the latest image to Docker Hub.
+GitHub Actions automatically runs the project's test suite whenever changes are pushed to GitHub. After all tests pass, the workflow builds the Docker image and pushes the latest image to Docker Hub.
 
 ## Docker Hub
 
@@ -151,6 +172,16 @@ Pull the latest image:
 docker pull pd486/module10-fastapi-is601:latest
 ```
 
+## GitHub Repository
+
+Repository:
+
+https://github.com/pd486/module10-fastapi-is601
+
+Final Project Branch:
+
+https://github.com/pd486/module10-fastapi-is601/tree/final-project
+
 ## Reflection
 
-See **Reflection.md** for a summary of the work completed in Module 14, the challenges encountered while building the frontend, and what I learned during the project.
+See **Reflection.md** for a summary of the development process, challenges encountered, and lessons learned while completing the FastAPI Calculator Final Project.
